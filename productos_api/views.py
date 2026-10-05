@@ -6,13 +6,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # TODO: reemplazar "tu_app" por el nombre real de la app donde están tus modelos.
-from core.models import Categoria, Marca, Proveedor, Producto
+from core.models import Categoria, Marca, Proveedor, Producto, FormaDePago
 from .listados import generar_listado_excel, generar_listado_pdf
 from .permissions import EsAdministrador
 from .serializers import (
     CategoriaSerializer,
     MarcaSerializer,
     ProveedorSerializer,
+    FormaDePagoSerializer,
     ProductoSerializer,
     UsuarioActualSerializer,
     ActualizacionMasivaSerializer,
@@ -22,7 +23,7 @@ from .serializers import (
 
 class CatalogoMaestroViewSet(viewsets.ModelViewSet):
     """
-    Base común para Categoría/Marca/Proveedor.
+    Base común para Categoría/Marca/Proveedor/Forma de pago.
 
     Cualquier usuario autenticado puede listar/ver (un Operador los necesita
     igual para los filtros de Productos y Actualización masiva), pero solo
@@ -30,7 +31,10 @@ class CatalogoMaestroViewSet(viewsets.ModelViewSet):
 
     "Eliminar" es en realidad una baja lógica (activo=False), nunca un
     borrado físico: Producto los referencia con on_delete=PROTECT, así que
-    un DELETE real fallaría apenas hubiera algún producto asociado.
+    un DELETE real fallaría apenas hubiera algún producto asociado. Forma
+    de pago no tiene esa relación todavía, pero se mantiene el mismo
+    comportamiento por consistencia (y porque VentaPago la va a referenciar
+    en la Fase 2).
     """
 
     def get_queryset(self):
@@ -48,23 +52,28 @@ class CatalogoMaestroViewSet(viewsets.ModelViewSet):
         instancia = self.get_object()
 
         # Regla de negocio: no se puede dar de baja si tiene al menos un
-        # producto activo con stock > 0 asociado.
-        tiene_stock = instancia.productos.filter(activo=True, stock__gt=0).exists()
-        if tiene_stock:
-            return Response(
-                {
-                    "detalle": (
-                        "No se puede eliminar: existen productos activos con "
-                        "stock mayor a cero asociados."
-                    )
-                },
-                status=status.HTTP_409_CONFLICT,
-            )
+        # producto activo con stock > 0 asociado. Forma de pago no tiene
+        # related_name "productos", así que se saltea esa validación para
+        # ella (getattr con default evita el AttributeError).
+        productos_relacionados = getattr(instancia, "productos", None)
+        if productos_relacionados is not None:
+            tiene_stock = productos_relacionados.filter(activo=True, stock__gt=0).exists()
+            if tiene_stock:
+                return Response(
+                    {
+                        "detalle": (
+                            "No se puede eliminar: existen productos activos con "
+                            "stock mayor a cero asociados."
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+            # Si no tiene productos activos con stock > 0 (puede tener
+            # productos activos con stock 0), se da de baja también a esos
+            # productos para no dejarlos huérfanos de una marca/categoría/
+            # proveedor inactivo.
+            productos_relacionados.filter(activo=True).update(activo=False)
 
-        # Si no tiene productos activos con stock > 0 (puede tener productos
-        # activos con stock 0), se da de baja también a esos productos para
-        # no dejarlos huérfanos de una marca/categoría/proveedor inactivo.
-        instancia.productos.filter(activo=True).update(activo=False)
         instancia.activo = False
         instancia.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -83,6 +92,11 @@ class MarcaViewSet(CatalogoMaestroViewSet):
 class ProveedorViewSet(CatalogoMaestroViewSet):
     queryset = Proveedor.objects.filter(activo=True)
     serializer_class = ProveedorSerializer
+
+
+class FormaDePagoViewSet(CatalogoMaestroViewSet):
+    queryset = FormaDePago.objects.filter(activo=True)
+    serializer_class = FormaDePagoSerializer
 
 
 class ProductoViewSet(viewsets.ModelViewSet):
@@ -147,6 +161,28 @@ class ProductoViewSet(viewsets.ModelViewSet):
             {"grupo": clave, "productos": grupos[clave]} for clave in orden_grupos
         ]
         return Response(resultado)
+
+    @action(detail=False, methods=["get"])
+    def buscar_por_codigo_barra(self, request):
+        """
+        /api/productos/buscar_por_codigo_barra/?codigo=7791234567890
+        Lo usa la app al escanear un código en la pantalla de Venta (Fase 2)
+        para traer directamente el producto que coincide.
+        """
+        codigo = request.query_params.get("codigo")
+        if not codigo:
+            return Response(
+                {"detalle": "Falta el parámetro 'codigo'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        producto = self.get_queryset().filter(codigo_barra=codigo).first()
+        if not producto:
+            return Response(
+                {"detalle": "No hay ningún producto con ese código de barra."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(ProductoSerializer(producto).data)
 
     @action(detail=False, methods=["post"])
     def actualizar_precios_masivo(self, request):

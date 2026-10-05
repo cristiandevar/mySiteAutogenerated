@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 # TODO: reemplazar "tu_app" por el nombre real de la app donde están tus modelos.
-from core.models import Categoria, Marca, Proveedor, Producto
+from core.models import Categoria, Marca, Proveedor, Producto, FormaDePago
 from .listados import COLUMNAS_LISTADO
 from .permissions import rol_de
 
@@ -22,6 +23,12 @@ class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
         fields = ["id", "nombre", "contacto", "email", "telefono", "activo"]
+
+
+class FormaDePagoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormaDePago
+        fields = ["id", "nombre", "activo"]
 
 
 class ProductoSerializer(serializers.ModelSerializer):
@@ -45,11 +52,37 @@ class ProductoSerializer(serializers.ModelSerializer):
             "porcentaje_ganancia",
             "precio_venta",
             "stock",
+            "codigo_barra",
             "activo",
             "creado",
             "actualizado",
         ]
         read_only_fields = ["precio_venta", "creado", "actualizado"]
+        extra_kwargs = {
+            # Por defecto DRF genera el validador de unicidad con un
+            # mensaje en inglés ("producto with this codigo barra already
+            # exists."). Se reemplaza acá por uno en español; sigue
+            # excluyendo la instancia actual al editar, igual que el
+            # automático (es el mismo UniqueValidator, solo con mensaje
+            # propio).
+            "codigo_barra": {
+                "validators": [
+                    UniqueValidator(
+                        queryset=Producto.objects.all(),
+                        message="Ya hay otro producto con ese código de barra.",
+                    )
+                ]
+            }
+        }
+
+    def validate_codigo_barra(self, valor):
+        # El form de la app manda "" cuando no se escaneó/escribió nada;
+        # igual que en el modelo, se normaliza a None para no chocar con
+        # el unique cuando haya más de un producto sin código. (DRF no
+        # llega a correr el UniqueValidator sobre "" ni sobre None porque
+        # el campo es allow_blank/allow_null, así que esta conversión no
+        # interfiere con esa validación.)
+        return valor or None
 
 
 class UsuarioActualSerializer(serializers.Serializer):

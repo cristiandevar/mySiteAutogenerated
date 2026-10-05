@@ -6,6 +6,7 @@ from .views import (
     CategoriaViewSet,
     MarcaViewSet,
     ProveedorViewSet,
+    FormaDePagoViewSet,
     ProductoViewSet,
     UsuarioActualView,
 )
@@ -14,6 +15,7 @@ router = DefaultRouter()
 router.register("categorias", CategoriaViewSet, basename="categoria")
 router.register("marcas", MarcaViewSet, basename="marca")
 router.register("proveedores", ProveedorViewSet, basename="proveedor")
+router.register("formas-de-pago", FormaDePagoViewSet, basename="formadepago")
 router.register("productos", ProductoViewSet, basename="producto")
 
 urlpatterns = [

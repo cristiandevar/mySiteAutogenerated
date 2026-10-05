@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Categoria, Marca, Proveedor, Producto
+from .models import Categoria, Marca, Proveedor, Producto, FormaDePago, Parametro
 from decimal import Decimal
 
 
@@ -19,7 +19,7 @@ def aumentar_10_por_ciento(modeladmin, request, queryset):
 @admin.action(description="Disminuir precio unitario 10%%")
 def disminuir_10_por_ciento(modeladmin, request, queryset):
     aplicar_porcentaje(modeladmin, request, queryset, -10)
-    
+
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion')
@@ -38,11 +38,23 @@ class ProveedorAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'contacto', 'email')
 
 
+@admin.register(FormaDePago)
+class FormaDePagoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'activo')
+    search_fields = ('nombre',)
+
+
+@admin.register(Parametro)
+class ParametroAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'tipo', 'valor', 'descripcion')
+    list_filter = ('tipo',)
+    search_fields = ('nombre',)
+
+
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'categoria', 'marca', 'proveedor', "precio_unitario", "porcentaje_ganancia", "precio_venta", "stock", "activo")
+    list_display = ('nombre', 'categoria', 'marca', 'proveedor', "precio_unitario", "porcentaje_ganancia", "precio_venta", "stock", "codigo_barra", "activo")
     list_filter = ('categoria', 'marca', 'proveedor')
-    search_fields = ('nombre',)
+    search_fields = ('nombre', 'codigo_barra')
     autocomplete_fields = ('categoria', 'marca', 'proveedor')
     actions = [aumentar_10_por_ciento, disminuir_10_por_ciento]
-

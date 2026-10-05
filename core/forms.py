@@ -42,13 +42,14 @@ class ProductoForm(forms.ModelForm):
         model = Producto
         fields = [
             'nombre', 'descripcion', 'precio_unitario', 'stock',
-            'categoria', 'marca', 'proveedor',
+            'codigo_barra', 'categoria', 'marca', 'proveedor',
         ]
         widgets = {
             'nombre': forms.TextInput(attrs=_INPUT),
             'descripcion': forms.Textarea(attrs={**_INPUT, 'rows': 3}),
             'precio_unitario': forms.NumberInput(attrs={**_INPUT, 'step': '0.01', 'min': '0'}),
             'stock': forms.NumberInput(attrs={**_INPUT, 'min': '0'}),
+            'codigo_barra': forms.TextInput(attrs={**_INPUT, 'placeholder': 'Opcional'}),
             'categoria': forms.Select(attrs=_SELECT),
             'marca': forms.Select(attrs=_SELECT),
             'proveedor': forms.Select(attrs=_SELECT),
