@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Preview sangría con ícono</title>
+<style>
+  body {
+    margin: 0;
+    background: #1a1a1a;
+    font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    padding: 24px;
+  }
+  .etiqueta {
+    color: #ddd;
+    font-size: 14px;
+    text-align: center;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  .telefono {
+    width: 320px;
+    background: #2b2b2b;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .status-bar {
+    background: #1565c0;
+    color: white;
+    font-size: 12px;
+    padding: 6px 14px 0 14px;
+  }
+  .header {
+    background: #1565c0;
+    color: white;
+    padding: 8px 16px 16px 16px;
+  }
+  .header .usuario {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .header .rol {
+    font-size: 14px;
+    color: #d6e6fb;
+    margin-top: 2px;
+  }
+  .lista {
+    background: #2b2b2b;
+    padding: 6px 0;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #f0f0f0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .item .icono {
+    width: 24px;
+    height: 24px;
+    margin-right: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    color: #cfcfcf;
+    flex-shrink: 0;
+  }
+  .item.hijo {
+    padding-left: 52px;
+  }
+  .item.hijo .icono {
+    color: #e0791f;
+  }
+  .item .flecha {
+    margin-left: auto;
+    color: #cfcfcf;
+    font-size: 12px;
+    padding-left: 8px;
+  }
+</style>
+</head>
+<body>
+
+  <div>
+    <p class="etiqueta">Actual: solo el texto se sangra</p>
+    <div class="telefono">
+      <div class="status-bar">12:43</div>
+      <div class="header">
+        <div class="usuario">crist</div>
+        <div class="rol">Administrador</div>
+      </div>
+      <div class="lista">
+        <div class="item"><span class="icono">👁</span>Inicio</div>
+        <div class="item"><span class="icono">🔧</span>Administración<span class="flecha">▾</span></div>
+
+        <div class="item hijo"><span class="icono" style="margin-left:0">📇</span>Productos</div>
+        <div class="item hijo"><span class="icono" style="margin-left:0">➤</span>Proveedores</div>
+        <div class="item hijo"><span class="icono" style="margin-left:0">🏷</span>Marcas</div>
+        <div class="item hijo"><span class="icono" style="margin-left:0">🔤</span>Categorías</div>
+
+        <div class="item"><span class="icono">🕐</span>Operaciones<span class="flecha">▸</span></div>
+        <div class="item"><span class="icono">🖼</span>Reportes<span class="flecha">▸</span></div>
+        <div class="item"><span class="icono">⏻</span>Cerrar sesión</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="etiqueta">Propuesta: ícono + texto sangrados</p>
+    <div class="telefono">
+      <div class="status-bar">12:43</div>
+      <div class="header">
+        <div class="usuario">crist</div>
+        <div class="rol">Administrador</div>
+      </div>
+      <div class="lista">
+        <div class="item"><span class="icono">👁</span>Inicio</div>
+        <div class="item"><span class="icono">🔧</span>Administración<span class="flecha">▾</span></div>
+
+        <div class="item hijo"><span class="icono">📇</span>Productos</div>
+        <div class="item hijo"><span class="icono">➤</span>Proveedores</div>
+        <div class="item hijo"><span class="icono">🏷</span>Marcas</div>
+        <div class="item hijo"><span class="icono">🔤</span>Categorías</div>
+
+        <div class="item"><span class="icono">🕐</span>Operaciones<span class="flecha">▸</span></div>
+        <div class="item"><span class="icono">🖼</span>Reportes<span class="flecha">▸</span></div>
+        <div class="item"><span class="icono">⏻</span>Cerrar sesión</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

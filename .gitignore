@@ -1,0 +1,33 @@
+# Entorno virtual de Python
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Base de datos local (SQLite)
+db.sqlite3
+db.sqlite3-journal
+
+# Variables de entorno y secretos: acá va a vivir el SECRET_KEY real y,
+# más adelante, las credenciales de mail para el envío de órdenes a
+# proveedores. Nunca se sube al repositorio.
+.env
+
+# Archivos subidos por usuarios (ej: imagen de factura de una orden)
+media/
+
+# Archivos estáticos recolectados (si en algún momento corrés
+# "python manage.py collectstatic")
+staticfiles/
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+'Claude outputs'/
